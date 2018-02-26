@@ -9,7 +9,6 @@ public class StarsParticleSystem : MonoBehaviour {
 	private Rigidbody2D gravitonRB;
 	private ParticleSystem.Particle[] points;
 
-	// Use this for initialization
 	void Start() {
 		gravitonRB = Graviton.GetComponent<Rigidbody2D>();
 		MakeParticles();
@@ -24,8 +23,6 @@ public class StarsParticleSystem : MonoBehaviour {
 		}
 	}
 
-
-	// Update is called once per frame
 	void Update() {
 		UpdateParticles();
 	}
@@ -36,16 +33,14 @@ public class StarsParticleSystem : MonoBehaviour {
 		var vb = velo.y < 0;
 		var vc = velo.x > 0;
 		var vd = velo.y > 0;
-		for (int i = 0; i < Count; i++)
-		{
+		for (int i = 0; i < Count; i++) {
 			var position = Camera.main.WorldToViewportPoint(points[i].position);
-			var pa = position.x >= 1.33f;
-			var pb = position.y >= 1.33f;
-			var pc = position.x <= -0.33f;
-			var pd = position.y <= -0.33f;
+			var pa = position.x >= 1.2f;
+			var pb = position.y >= 1.2f;
+			var pc = position.x <= -0.2f;
+			var pd = position.y <= -0.2f;
 			var pe = position.z <= 0;
-			if (va && pa || vb && pb || vc && pc || vd && pd || pe)
-			{
+			if (va && pa || vb && pb || vc && pc || vd && pd || pe) {
 				points[i].position = getRandomPosition(true);
 			}
 		}
@@ -57,7 +52,7 @@ public class StarsParticleSystem : MonoBehaviour {
 		Vector3 point = new Vector3(
 			Random.Range(velo.x - 0.33f, 1.33f + velo.x),
 			Random.Range(velo.y - 0.33f, 1.33f + velo.y),
-			Mathf.Pow(Random.Range(0.05f, 0.99f), 0.33f) * Camera.main.farClipPlane
+			(Mathf.Log(Random.Range(0.05f, 0.99f), 2) / 10 + 1) * Camera.main.farClipPlane
 		);
 		var px = point.y > 0 && point.y < 1;
 		var py = point.x > 0 && point.x < 1;

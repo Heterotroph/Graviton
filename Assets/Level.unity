@@ -165,8 +165,8 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 180
-  field of view: 80
+  far clip plane: 100
+  field of view: 120
   orthographic: 0
   orthographic size: 16
   m_Depth: -1
@@ -294,8 +294,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Graviton: {fileID: 2031988228}
-  Size: 1
-  Count: 1200
+  Size: 0.4
+  Count: 1000
 --- !u!198 &943562126
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -355,7 +355,7 @@ ParticleSystem:
   moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: -468305717
+  randomSeed: -1614710103
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -3568,25 +3568,30 @@ GameObject:
   - component: {fileID: 1109315660}
   - component: {fileID: 1109315661}
   m_Layer: 0
-  m_Name: SpawnPivot
+  m_Name: SpawnRect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1109315660
-Transform:
+--- !u!224 &1109315660
+RectTransform:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1109315659}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -30, y: 30, z: 10}
+  m_LocalPosition: {x: 0, y: 0, z: 10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 159796491}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!212 &1109315661
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -3737,7 +3742,7 @@ Transform:
   m_GameObject: {fileID: 1117571693}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 3, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 2, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
@@ -3804,12 +3809,21 @@ Prefab:
     - target: {fileID: 50122589680625142, guid: 48936992616eafd499b8b8dfe339e7a6,
         type: 2}
       propertyPath: m_AngularDrag
-      value: 0.01
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 50122589680625142, guid: 48936992616eafd499b8b8dfe339e7a6,
         type: 2}
       propertyPath: m_LinearDrag
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 58669758291322146, guid: 48936992616eafd499b8b8dfe339e7a6,
+        type: 2}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4275521274375700, guid: 48936992616eafd499b8b8dfe339e7a6, type: 2}
+      propertyPath: m_LocalScale.x
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 48936992616eafd499b8b8dfe339e7a6, type: 2}
@@ -3898,6 +3912,11 @@ Prefab:
       propertyPath: SpawPivot
       value: 
       objectReference: {fileID: 1109315659}
+    - target: {fileID: 114967807912576790, guid: a929c35c40394a64cbba4f2e6cbc05f1,
+        type: 2}
+      propertyPath: SpawnRect
+      value: 
+      objectReference: {fileID: 1109315659}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: a929c35c40394a64cbba4f2e6cbc05f1, type: 2}
   m_IsPrefabParent: 0
@@ -3931,7 +3950,7 @@ CircleCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
@@ -4037,7 +4056,7 @@ Rigidbody2D:
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDrag: 0
-  m_AngularDrag: 0.01
+  m_AngularDrag: 0.1
   m_GravityScale: 0
   m_Material: {fileID: 0}
   m_Interpolate: 0

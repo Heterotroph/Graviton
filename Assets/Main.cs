@@ -6,29 +6,35 @@ public class Main : MonoBehaviour {
 
 	const float GRAVITY = 0.000000000066742f * 1000000000;
 	const float MAX_MASS = 10000.0f;
-	const float MIN_MASS = 100.0f;
-	const float MAX_FORCE = 15.0f;
-	const float MAX_VELOCITY = 12.0f;
+	const float MIN_MASS = 2000.0f;
+	const float MAX_FORCE = 20f;
+	const float MAX_VELOCITY = 3.0f;
+	const float CEIL_SIZE = 20f;
 
 	public GameObject Graviton;
 	public GameObject Blackhole;
 	public GameObject Body;
-	public GameObject SpawPivot;
+	public GameObject SpawnRect;
 
 	private List<GameObject> bodies = new List<GameObject>();
+	private Hashtable bodiesData = new Hashtable();
 	private Rigidbody2D gravitonRB;
 	private Rigidbody2D blackholeRB;
 	private CircleCollider2D blackholeCC;
-	private Transform spawnPivot;
+	private RectTransform spawnPivotT;
+
+	private float timer = 0;
 
 	void Start () {
+		Blackhole.GetComponent<SpriteRenderer>().enabled = false;
 		gravitonRB = Graviton.GetComponent<Rigidbody2D>();
 		blackholeRB = Blackhole.GetComponent<Rigidbody2D>();
 		blackholeCC = Blackhole.GetComponent<CircleCollider2D>();
-		spawnPivot = SpawPivot.transform;
+		spawnPivotT = SpawnRect.GetComponent<RectTransform>();
 	}
 
 	void Update() {
+		timer += Time.deltaTime;
 		MoveCamera();
 		ProcessInput();
 		BlahBlah();
@@ -40,26 +46,20 @@ public class Main : MonoBehaviour {
 		if (Input.GetMouseButtonDown(0)) {
 			blackholeRB.mass = MIN_MASS;
 			Blackhole.GetComponent<SpriteRenderer>().enabled = true;
-			Debug.Log("DOWN " + blackholeRB.mass);
 		}
 		if (Input.GetMouseButton(0)) {
 			Blackhole.transform.position = Camera.main.ScreenToWorldPoint(Input.mousePosition + Vector3.forward * 10);
-			ApplyGravitation(blackholeRB);
+			ApplyGravitation(blackholeRB, gravitonRB);
 			var massAcceleration = (MAX_MASS - MIN_MASS) * 0.1f;
 			blackholeRB.mass = Mathf.Min(blackholeRB.mass + massAcceleration * Time.deltaTime, MAX_MASS);
-			Debug.Log("HOLD " + blackholeRB.mass);
-			Debug.Log("VELO " + gravitonRB.velocity + "  " + gravitonRB.velocity.magnitude);
 		} else if (Input.GetMouseButtonUp(0)) {
 			blackholeRB.mass = MIN_MASS;
 			Blackhole.GetComponent<SpriteRenderer>().enabled = false;
-			Debug.Log("UP_0 " + blackholeRB.mass);
 		}
 		if (Input.GetMouseButtonUp(1)) {
 			blackholeRB.mass = MIN_MASS;
 			gravitonRB.AddForce(Vector2.zero, ForceMode2D.Force);
-			Debug.Log("UP_1 " + blackholeRB.mass);
 			gravitonRB.velocity = Vector2.zero;
-			Debug.Log("VELO " + gravitonRB.velocity + "  " + gravitonRB.velocity.magnitude);
 		}
 	}
 
@@ -69,14 +69,38 @@ public class Main : MonoBehaviour {
 	}
 
 	void BlahBlah() {
-		var start = spawnPivot.position;
-		var end = Camera.main.ViewportToWorldPoint(new Vector3(1, 1, 1));
+		var corners = new Vector3[4];
+		spawnPivotT.GetWorldCorners(corners);
+		var startX = corners[0].x - corners[0].x % CEIL_SIZE;
+		var endX = corners[2].x - corners[2].x % CEIL_SIZE;
+		var startY = corners[0].y - corners[0].y % CEIL_SIZE;
+		var endY = corners[2].y - corners[2].y % CEIL_SIZE;
+		for (var x = startX; x <= endX; x += CEIL_SIZE) {
+			for (var y = startY; y <= endY; y += CEIL_SIZE) {
+				var key = x + "_" + y;
+				var position = Camera.main.WorldToViewportPoint(new Vector3(x, y, 0));
+				var pa = position.x > 1f;
+				var pb = position.y > 1f;
+				var pc = position.x < 0f;
+				var pd = position.y < 0f;
+				var isOutsideViewport = pa || pb || pc || pd;
+				if (bodiesData[key] == null && isOutsideViewport) {
+					var rand = Random.Range(0, CEIL_SIZE);
+					bodiesData[key] = new BodyData {
+						mass = 6000,
+						position = new Vector3(x + rand, y + rand, 0)
+					};
+					SpawnBody((BodyData)bodiesData[key]);
+				}
+			}
+		}
+
 	}
 
-	void SpawnBody(Vector3 position) {
+	void SpawnBody(BodyData data) {
 		var body = Object.Instantiate(Body);
-		body.GetComponent<Rigidbody2D>().mass = Random.Range(MIN_MASS, MAX_MASS);
-		body.transform.position = position;
+		body.GetComponent<Rigidbody2D>().mass = data.mass;
+		body.transform.position = data.position;
 		bodies.Add(body);
 	}
 
@@ -87,19 +111,26 @@ public class Main : MonoBehaviour {
 
 	void ApplyBodiesGravitation() {
 		for (var i = 0; i < bodies.Count; i++) {
-			ApplyGravitation(bodies[i].GetComponent<Rigidbody2D>());
+			ApplyGravitation(bodies[i].GetComponent<Rigidbody2D>(), gravitonRB);
 		}
 	}
 
-	void ApplyGravitation(Rigidbody2D body) {
-		var p0 = body.transform.position;
-		var p1 = gravitonRB.transform.position;
-		var m0 = body.mass;
-		var m1 = gravitonRB.mass;
+	void ApplyGravitation(Rigidbody2D source, Rigidbody2D target) {
+		var p0 = source.transform.position;
+		var p1 = target.transform.position;
+		var m0 = source.mass;
+		var m1 = target.mass;
 		var r = Vector3.Distance(p0, p1);
 		var force = m0 * m1 / (r * r) * GRAVITY * Time.deltaTime;
 		force = Mathf.Clamp(force, -MAX_FORCE, MAX_FORCE);
 		var vector = (p0 - p1).normalized * force;
-		gravitonRB.AddForce(vector, ForceMode2D.Force);
+		target.AddForce(vector, ForceMode2D.Force);
 	}
+
+
+	class BodyData {
+		public float mass { get; set; }
+		public Vector3 position { get; set; }
+	}
+
 }
